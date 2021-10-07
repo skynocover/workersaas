@@ -1,5 +1,8 @@
 import NextAuth from 'next-auth';
 import Providers from 'next-auth/providers';
+import sha256 from 'crypto-js/sha256';
+
+import { prisma } from '../../../database/db';
 
 export default NextAuth({
   providers: [
@@ -10,19 +13,22 @@ export default NextAuth({
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials, req) {
-        if (
-          credentials.email === process.env.NEXTAUTH_USER &&
-          credentials.password === process.env.NEXTAUTH_PASSWORD
-        ) {
-          const user = {
-            name: process.env.NEXTAUTH_USER,
-            email: `${process.env.NEXTAUTH_USER}@gmail.com`,
-          };
+        const user = await prisma.users.findFirst({
+          where: { account: credentials.email },
+        });
 
-          return user;
-        } else {
+        if (!user) {
           return null;
         }
+
+        if (user.password !== sha256(credentials.password).toString(CryptoJS.enc.Hex)) {
+          return null;
+        }
+
+        return {
+          name: user.account,
+          email: `${user.account}@gmail.com`,
+        };
       },
     }),
   ],

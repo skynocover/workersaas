@@ -7,10 +7,7 @@ import { Notification } from '../components/Notification';
 import { prisma } from '../database/db';
 import { AppContext } from '../components/AppContext';
 
-export default function Index({
-  services,
-  error,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Index({ error }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const appCtx = React.useContext(AppContext);
   const router = useRouter();
   const [session, loading] = useSession();
@@ -21,8 +18,6 @@ export default function Index({
     } else if (!loading && session) {
       if (error) {
         Notification.add('error', error);
-      } else {
-        appCtx.setDataSource(services);
       }
       router.push('/Home');
     }
@@ -35,10 +30,7 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     const session = await getSession({ req });
     if (!session) return { props: {} };
 
-    const services = await prisma.service.findMany({
-      select: { id: true, name: true, domain: true, port: true },
-    });
-    return { props: { services } };
+    return { props: {} };
   } catch (error: any) {
     return { props: { error: error.message } };
   }

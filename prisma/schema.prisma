@@ -8,21 +8,19 @@ generator client {
     previewFeatures = ["mongoDb"]
 }
 
-model Service {
-    id        String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
-    name      String
-    domain    String
-    port      Int
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    Handler   Handler[]
+model Users {
+    id       String    @id @default(dbgenerated()) @map("_id") @db.ObjectId
+    account  String    @unique
+    password String
+    Service  Service[]
 }
 
-model Handler {
-    id        String  @id @default(dbgenerated()) @map("_id") @db.ObjectId
-    serviceId String  @db.ObjectId
-    Service   Service @relation(fields: [serviceId], references: [id])
-    type      String?
-    routes    String?
-    target    String?
+model Service {
+    id   String @id @default(dbgenerated()) @map("_id") @db.ObjectId
+    name String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    userId    String   @db.ObjectId
+    User      Users    @relation(fields: [userId], references: [id])
 }
